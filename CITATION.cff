@@ -1,0 +1,18 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Dynamical Study of a 4D Chaotic System
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Daniel
+    name-particle: D.
+    family-names: Montesinos Capacete
+    name-suffix: M.C.
+repository-code: >-
+  https://github.com/SrMontesinos01/Dynamical-Systems-Project
+license: MIT
+date-released: '2024-02-16'
