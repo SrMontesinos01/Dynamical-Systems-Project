@@ -11,6 +11,7 @@ using LinearAlgebra, Polynomials
 
 function findlocalmaxima(t, u::Vector{T}, dudt::Vector{T}) where T <: Real
     """
+    This function is taken from:
     https://discourse.julialang.org/t/how-to-find-the-local-extrema-of-the-solutions-when-solving-a-differential-equation/94628/14
 
     findlocalmaxima(t, u::Vector{T}, dudt::Vector{T}) where T <: Real
