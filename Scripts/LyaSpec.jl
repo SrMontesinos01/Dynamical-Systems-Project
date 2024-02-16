@@ -33,7 +33,7 @@ p1 = [0.1, 0.5, 0.5, 10, 4, 0.1, 1] #  a, b, c, d, e, α, β
 integrationMethod = (alg = Tsit5(), adaptive = true, dense = true, dt = 0.005, reltol=1e-8, abstol=1e-8)
 syst_1 = CoupledODEs(mem_system, u0 , p1, diffeq =integrationMethod)
 
-root = joinpath(@__DIR__, "LyaSpec_v2.txt") # Fichero donde se guarda el mapa
+root = joinpath(@__DIR__, "LyaSpec_v2.txt") # Saving the results
 file = open(root, "w")
 
 as = 0.001:0.001:1.2

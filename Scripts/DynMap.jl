@@ -5,15 +5,9 @@ using OrdinaryDiffEq
 using DelimitedFiles
 
 
-# ------------------ Funciones Auxiliares ------------------ #
+# ------------------ Auxiliary Functions ------------------ #
 function clasificar_caos(exponentes_lyapunov)
-    # Contar los exponentes positivos, 0 y negativos
-    # cant_positivos = count(x -> x >= 10^(-3), exponentes_lyapunov)
-    # cant_ceros = count(x -> (x < 10^(-3)) & (x > -10^(-3)), exponentes_lyapunov)
-
-    # cant_positivos = count(x -> x >= 10^(-5), exponentes_lyapunov)
-    # cant_ceros = count(x -> (x < 10^(-5)) & (x > -10^(-5)), exponentes_lyapunov)
-
+    # Count positive, zero, and negative exponents
     cant_positivos = count(x -> x >= 10^(-4), exponentes_lyapunov)
     cant_ceros = count(x -> (x < 10^(-4)) & (x > -10^(-4)), exponentes_lyapunov)
 
@@ -21,64 +15,31 @@ function clasificar_caos(exponentes_lyapunov)
     # print("zeros:", cant_ceros,"\n")
     if cant_positivos == 0
         if cant_ceros == 0
-            # Punto fijo: Todos los exponentes son negativos.
+            # Fixed point: All exponents are negative.
             return 1
         elseif cant_ceros == 1
-            # Periodicidad: Un exponente es 0 y los demás son negativos.
+            # Periodicity: One exponent is 0 and the others are negative.
             return 2
         elseif cant_ceros == 2
-            # Periodicidad: Dos exponentes son 0 y el resto son negativos.
+            # Periodicity: Two exponents are 0 and the rest are negative.
             return 2
         elseif cant_ceros == 3
-            # 3-toro: Tres exponentes son 0 y el resto son negativos.
+            # 3-torus: Three exponents are 0 and the rest are negative.
             return 3
         end
     elseif cant_positivos == 1 
-        # Caos normal: Un exponente positivo, uno 0 y el resto negativos.
+        # Normal chaos: One positive exponent, one 0, and the rest negative.
         return 4
     elseif cant_positivos == 2 
-        # Hipercaos: Dos exponentes positivos, uno 0 y el resto negativos.
+         # Hyperchaos: Two positive exponents, one 0, and the rest negative.
         return 5
     elseif cant_ceros == 2 
-        # Quasiperiodicidad (2-toro): Dos exponentes 0 y el resto son negativos.
+        # Quasiperiodicity (2-torus): Two 0 exponents and the rest are negative.
         return 6
     else
-        # Comportamiento no clasificado.
+        # Unclassified behavior.
         return 0
     end
-end
-
-function asignar_color(numero)
-    if numero == 1
-        # Punto fijo: Todos los exponentes son negativos. (Rojo oscuro)
-        return RGB(139, 0, 0) / 255
-    elseif numero == 2
-        # Periodicidad: Un exponente es 0 y los demás son negativos. (Amarillo)
-        return RGB(255, 255, 0) / 255
-    elseif numero == 3
-        # 3-toro: Tres exponentes son 0 y el resto son negativos. (Verde oscuro)
-        return RGB(0, 100, 0) / 255
-    elseif numero == 4
-        # Caos normal: Un exponente positivo, uno 0 y el resto negativos. (Azul claro)
-        return RGB(173, 216, 230) / 255
-    elseif numero == 5
-        # Hipercaos: Dos exponentes positivos, uno 0 y el resto negativos. (Violeta)
-        return RGB(148, 87, 235) / 255
-    elseif numero == 6
-        # Quasiperiodicidad (2-toro): Dos exponentes 0 y el resto son negativos. (Naranja)
-        return RGB(255, 165, 0) / 255
-    else
-        # Comportamiento no clasificado. (Gris)
-        return RGB(169, 169, 169) / 255
-    end
-end
-
-function f_jac(J,u,p,t)
-    J[1,1] = 2.0 - 1.2 * u[2]
-    J[1,2] = -1.2 * u[1]
-    J[2,1] = 1 * u[2]
-    J[2,2] = -3 + u[1]
-    nothing
 end
 
 function mem_system(du, u, p, t)
@@ -93,7 +54,7 @@ function mem_system(du, u, p, t)
     return nothing
 end
 
-# ------------------ Definiendo el sistema ------------------ #
+# ------------------ Defining the System ------------------ #
 u0 = [-1, -0.5, -0.5, -3] # Initial condition
 p1 = [0.1, 0.5, 0.5, 10, 4, 0.1, 1] #  a, b, c, d, e, α, β
 integrationMethod = (alg = Tsit5(), adaptive = true, dense = true, dt = 0.005, reltol=1e-8, abstol=1e-8)
@@ -108,8 +69,8 @@ set_parameter!(syst_1, 2, 0.297)
 set_parameter!(syst_1, 1, 0.001)
 lya_spec = lyapunovspectrum(syst_1, N; Ttr = 100, show_progress = true)
 
-# ------------------ Determinando la precision de los exponentes ------------------ #
-# Con estos parametros, se ha comprobado que el sistema no es caótico.
+# ------------------ Determining the Precision of Exponents ------------------ #
+# With these parameters, the system is known to be non chaotic
 set_parameter!(syst_1, 2, 0.5)
 set_parameter!(syst_1, 1, 1.18)
 
@@ -140,8 +101,8 @@ lya_spec = lyapunovspectrum(syst_1, N; Ttr = 100, show_progress = true)
 -0.08068184454803742
 """
 
-# ------------------ Calculando el mapa dinámico ------------------ #
-root = joinpath(@__DIR__, "DynMap2_v7.txt") # Fichero donde se guarda el mapa
+# ------------------ Calculating the Dynamic Map ------------------ #
+root = joinpath(@__DIR__, "DynMap2_v7.txt") # File to save the map
 file = open(root, "w")
 collect(0.001:0.003:0.601)
 collect(0.001:0.006:1.201)
@@ -168,30 +129,31 @@ for b in bArr
     end
     write(file, "\n")
 end
-close(file) # Importante cerrar el archivo al terminar
+close(file) 
 end
 
-# ------------------ Leer el mapa dinámico como matriz ------------------ #
+# ------------------ Read the Dynamical Map as a Matrix ------------------ #
 root = joinpath(@__DIR__, "DynMap2_v7.txt")
 
-contenido = readlines(root) # Lee todo el archivo
+contenido = readlines(root) 
 M = []
-# Procesa cada línea del archivo
+
+# Process every line 
 for linea in contenido
-    # Divide la línea usando "\t" y " " como delimitadores
+    # Divide tje line using "\t" and " " 
     numeros = split(linea, ['\t', ' '])
     
-    # Convierte los elementos de la cadena a números y los agrega a la matriz
+    # Turn them into Int vairbles
     push!(M, parse.(Int, filter(x -> x ≠ "", numeros)))
 end
-M[1]
 
+# M[1]
 M= hcat(M...)
-println(M) # Muestra la matriz resultante
-M[1,:]
+# println(M) # Muestra la matriz resultante
+# M[1,:]
 valores_unicos = unique(M)
 
-# Crea el mapa de calor utilizando la función heatmap
+# Creates a heatmap
 fig, ax, hm = heatmap(aArr, bArr, M)
 Colorbar(fig[:, end+1], hm)
 

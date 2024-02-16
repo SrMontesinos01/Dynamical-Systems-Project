@@ -113,7 +113,7 @@ save(root, fig)
 
 
 # ----------------------------------------------------- #
-# Interactive trajectory 3D (no sliders)--->??
+# Interactive trajectory 3D (no sliders)---> 3D Video
 # ----------------------------------------------------- #
 
 u0 = [-1, -0.5, -0.5, -3] # Initial condition
@@ -186,8 +186,7 @@ end
 
 
 # ----------------------------------------------------- #
-# Interactive trajectory for 2D plots
-# This part have been use for the 2D Movies
+# Interactive trajectory for 2D plots ---> 2D Video
 # ----------------------------------------------------- #
 u0s = [
     [-1, -0.5, -0.5, -3] ,
@@ -251,124 +250,3 @@ record(fig1, root; framerate = 60) do io
         for j in 1:30; step1[] = 0; end
     end
 end
-
-# ----------------------------------------------------- #
-# Interactive trajectory with Sliders 
-# ----------------------------------------------------- #
-# For the sliders
-# a, b, c, d, e, α, β = p
-ps = Dict(
-    1 => 0.01:0.01:1.3,
-    2 => 0.01:0.01:0.6,
-    3 => 0.01:0.01:1.0,
-    4 => 1:0.01:15.0,
-    5 => 0.01:0.01:5.0,
-    6 => 0.01:0.01:2.0,
-    7 => 0.01:0.01:2.0
-)
-pnames = Dict(1 => "a", 2 => "b", 3 => "c", 4 => "d", 5 => "e", 6 => "α", 7 => "β" )
-
-# Limits for the 3D plot and corresponding 2D plot
-lims = (
-    (-3.0, 3.0),
-    (-15.0, 15.0),
-    (-15.0, 25.0),
-)
-
-# Set of Initial Conditions
-u0s = [
-    [-1, -0.5, -0.5, -3] ,
-    [-1, -0.5, -0.5, -3] .+ 10^(-5),
-    [-1, -0.5, -0.5, -3] .- 10^(-5)
-]
-
-figure, obs, step, paramvals = interactive_evolution(
-    syst_1, u0s; 
-    ps = ps, 
-    tail = 1000, 
-    pnames = pnames, 
-    lims = lims,
-    idxs = [1, 2, 3],
-    figure = (resolution = (1200, 600),),
-)
-
-# ----------------------------------------------------- #
-# Obtain the lyapunovspectrum for u0
-# ----------------------------------------------------- #
-N = 10^4
-
-as = 0.01:0.0001:1.2
-as= 0.01:0.5:1.2
-collect(as)
-λs = zeros(length(as), 4)
-
-for (i, a) in enumerate(as)
-    @show i
-    set_parameter!(syst_1, 1, a)
-    λs[i, :] .= lyapunovspectrum(syst_1, 10000; Ttr = 500)
-end
-
-fig = Figure()
-ax = Axis(fig[1, 1]; xlabel = "a", ylabel = "λ")
-lines!(ax, as, λs[:, 1], label = "λ1")
-lines!(ax, as, λs[:, 2], label = "λ2")
-lines!(ax, as, λs[:, 3], label = "λ3")
-lines!(ax, as, λs[:, 4], label = "λ4")
-
-# ----------------------------------------------------- #
-# Bifurcation Diagram?? --> Dont seems to work
-# ----------------------------------------------------- #
-using NLsolve
-function mem_systemv2(du, u)
-    x, y, z, v = u
-    b, c, d, e, α, β = [0.5, 0.5, 10, 4, 0.1, 1]
-
-    du[1] = -(av2*y^2 - b)*x - (α*v + β)*z
-    du[2] = -c*x - d*y + e*y*x^2
-    du[3] = x
-    du[4] = z
-
-    return nothing
-end
-
-u0 = [-1, -0.5, -0.5, -3] # Initial condition
-av2 = 0.1
-sol = nlsolve(mem_systemv2, u0)
-sol.zero
-
-
-# Using the "produce_orbitdiagram". Not really working :(
-plane = 3
-coord = 4
-p_index = 1
-pvalues = 0.01:0.01:1.2
-output = produce_orbitdiagram(syst_1, plane, coord,
-                     p_index, pvalues)
-
-
-fig = Figure()
-ax1 = Axis(fig[1, 1]; xlabel = "x", ylabel = "y")
-for (j, p) in enumerate(pvalues)
-    l = length(output[j])
-    v = fill(p, l)
-    scatter!(ax1, v, output[j], color = "black")
-end
-# ----------------------------------------------------- #
-# Poincare
-# ----------------------------------------------------- #
-u0s = [
-    [-1, -0.5, -0.5, -3] ,
-    [-1, -0.5, -0.5, -3] .+ 10^(-9),
-    [-1, -0.5, -0.5, -3] .- 10^(-9)
-]
-
-
-# SVector(1,2,4) --> chose the 3 variables (x1,x2,x3,x4)
-trs = [trajectory(syst_1, 10000, u0)[1][:, SVector(1,2,3)] for u0 ∈ u0s]
-for i in 2:length(u0s)
-    append!(trs[1], trs[i])
-end
-# Dimension of the plane for scanning
-j = 3
-
-brainscan_poincaresos(trs, j; linekw = (transparency = true,))
